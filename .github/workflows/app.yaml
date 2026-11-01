@@ -48,6 +48,13 @@ jobs:
           DESCRIPTION: ${{ steps.info.outputs.description }}
           URL: ${{ steps.info.outputs.url }}
         run: |
+          # The helper's values are JSON strings ("…"); decode them.
+          unquote() { jq -rn --arg v "$1" '$v | (fromjson? // .)'; }
+          IMAGE=$(unquote "$IMAGE")
+          VERSION=$(unquote "$VERSION")
+          NAME=$(unquote "$NAME")
+          DESCRIPTION=$(unquote "$DESCRIPTION")
+          URL=$(unquote "$URL")
           {
             echo "image_name=${IMAGE##*/}"
             echo "registry_prefix=${IMAGE%/*}"
