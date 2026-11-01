@@ -1,0 +1,62 @@
+{{define "content"}}{{$d := .Data}}{{$p := $d.E.Position}}
+<p class="back"><a href="{{$.Base}}/">← Trackers</a></p>
+<div class="head-row">
+  <h1>{{$d.E.Name}}</h1>
+  <span class="badge is-{{$d.State}}">{{$d.Badge}}</span>
+</div>
+
+<div class="grid">
+  <div class="stack">
+    {{if $d.Pins}}<div class="map" data-map data-pins='{{json $d.Pins}}' data-areas='{{json $d.Areas}}' data-zoom="15"></div>
+    {{else}}<section class="card card-pad empty"><p>No position yet. It appears once the tracker sends one.</p></section>{{end}}
+
+    <section class="card card-pad">
+      <h2>Latest position</h2>
+      <dl class="dl">
+        <div><dt>Measured</dt><dd>{{if $d.Updated}}{{$d.Updated}} · {{stamp $p.FixedTime}}{{else}}-{{end}}</dd></div>
+        <div><dt>Coordinates</dt><dd>{{if $p.Latitude}}<a href="https://www.openstreetmap.org/?mlat={{num $p.Latitude ""}}&mlon={{num $p.Longitude ""}}#map=16/{{num $p.Latitude ""}}/{{num $p.Longitude ""}}" target="_blank" rel="noopener">{{num $p.Latitude ""}}, {{num $p.Longitude ""}}</a>{{else}}-{{end}}</dd></div>
+        <div><dt>Speed</dt><dd>{{num $p.Speed " km/h"}}</dd></div>
+        <div><dt>Altitude</dt><dd>{{num $p.Altitude " m"}}</dd></div>
+        <div><dt>Battery</dt><dd>{{num $p.BatteryLevel " %"}}</dd></div>
+        <div><dt>GSM signal</dt><dd>{{int $p.GSMSignal " of 5"}}</dd></div>
+        <div><dt>GSM operator</dt><dd>{{int $p.GSMOperatorCode ""}}</dd></div>
+        <div><dt>GPS signal</dt><dd>{{int $p.GPSSignal " of 5"}} · HDOP {{num $p.HDOP ""}} · {{int $p.Satellites " satellites"}}</dd></div>
+        <div><dt>Temperature</dt><dd>{{num $p.ChipTemperature " °C"}} <span class="faint">inside the tracker</span></dd></div>
+        <div><dt>Received</dt><dd>{{stamp $p.ServerTime}}</dd></div>
+      </dl>
+      {{if $p.Attributes}}<details class="raw"><summary>Raw values</summary><pre>{{json $p.Attributes}}</pre></details>{{end}}
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card card-pad">
+      <h2>Settings</h2>
+      <form method="post" action="{{$.Base}}/trackers/{{$d.E.ID}}" class="form">
+        <label for="name">Name</label>
+        <div class="inline-form"><input id="name" name="name" value="{{$d.E.Name}}" maxlength="40" required><button class="btn btn-primary">Save</button></div>
+      </form>
+      <dl class="dl">
+        <div><dt>IMEI</dt><dd class="mono">{{$d.T.IMEI}}</dd></div>
+        <div><dt>Device ID</dt><dd class="mono">{{$d.E.PublicID}}</dd></div>
+        <div><dt>Model</dt><dd>{{$d.E.Model}}</dd></div>
+        <div><dt>Loxone number</dt><dd class="mono">t{{$d.E.LoxoneNumber}}</dd></div>
+        <div><dt>Added</dt><dd>{{if $d.T.AddedAt}}{{date $d.T.AddedAt}}{{end}}</dd></div>
+        <div><dt>Last connected</dt><dd>{{ago $d.T.LastSeenAt}}</dd></div>
+        <div><dt>Stored positions</dt><dd>{{$d.Count}}</dd></div>
+      </dl>
+      <form method="post" action="{{$.Base}}/trackers/{{$d.E.ID}}/remove" data-confirm="Remove {{$d.E.Name}} and its positions? If it connects again it waits to be added.">
+        <button class="btn btn-danger">Remove tracker</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="card-pad"><h2>What Loxone gets</h2><p class="sub">The values the Miniserver reads now. An empty value isn't sent, so Loxone keeps the last one.</p></div>
+      <table class="table compact">
+        <tbody>
+        {{range $d.Loxone}}<tr><td>{{.Title}}<span class="faint mono">{{.Key}} · {{.Range}}</span></td><td class="num mono">{{.Value}}</td></tr>{{end}}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+{{end}}

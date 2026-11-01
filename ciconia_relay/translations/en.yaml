@@ -1,0 +1,35 @@
+configuration:
+  retention_days:
+    name: Keep positions (days)
+    description: Older positions are deleted. Each tracker's latest position is always kept.
+  log_packets:
+    name: Log packets
+    description: Write every packet a tracker sends to the log, as hex. For checking what a tracker reports.
+  mqtt:
+    name: Home Assistant through MQTT
+    description: Show your trackers in Home Assistant through MQTT, with no integration to install. Uses the Mosquitto broker app, or the broker below. Turn it off if you use the Ciconia integration with this relay instead.
+  mqtt_server:
+    name: MQTT broker
+    description: Another broker instead of the Mosquitto app, e.g. mqtt://192.168.1.10:1883. Leave empty for the Mosquitto app.
+  mqtt_username:
+    name: MQTT user name
+    description: For the broker above.
+  mqtt_password:
+    name: MQTT password
+    description: For the broker above.
+  tls_hosts:
+    name: Names for the TLS certificate
+    description: Comma-separated names or IP addresses your trackers use to reach this machine, put in the self-signed certificate. Leave empty if unsure.
+  certfile:
+    name: Certificate file
+    description: Your own certificate for the TLS port, in /ssl (e.g. fullchain.pem). Leave empty to use a self-signed one.
+  keyfile:
+    name: Key file
+    description: Its private key, in /ssl (e.g. privkey.pem).
+  map_tiles:
+    name: Map tiles
+    description: Tile address for the panel's maps. Leave empty for OpenStreetMap.
+network:
+  5027/tcp: Trackers, Codec 8 over TCP. Forward this port to the internet.
+  5028/tcp: Trackers, Codec 8 over TLS. Forward this port to the internet.
+  8080/tcp: For Loxone and other devices on your network. Home Assistant itself doesn't need it.

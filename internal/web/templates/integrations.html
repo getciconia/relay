@@ -1,0 +1,75 @@
+{{define "content"}}{{$d := .Data}}
+<h1>Home Assistant &amp; Loxone</h1>
+<div class="grid">
+  <section class="card card-pad">
+    <h2>Home Assistant</h2>
+    {{with $d.MQTT}}
+    <div class="head-row"><h3>Through MQTT</h3><span class="badge{{if .Connected}} is-home{{end}}">{{if .Connected}}Connected{{else}}Not connected{{end}}</span></div>
+    <p>Your trackers appear in Home Assistant by themselves, each as a device with its location and sensors, through the MQTT broker <code>{{.Broker}}</code>. You don't need the Ciconia integration for this relay: use one or the other, or every tracker shows up twice.</p>
+    {{if .Error}}<div class="notice notice-warn">{{.Error}}</div>{{end}}
+    <p class="small faint">Topics <code>{{.Topic}}/…</code>, discovery under <code>{{.Prefix}}/</code>.</p>
+    <h3>Or with the Ciconia integration</h3>
+    {{end}}
+    <ol class="steps">
+      <li>Install the <b>Ciconia</b> integration (HACS) and restart Home Assistant.</li>
+      <li>Add it: <b>Settings → Devices &amp; services → Add integration → Ciconia</b>. Open <b>Advanced</b> and set the server address to
+        <span class="copy"><code>{{$d.RelayURL}}</code><button type="button" class="btn btn-ghost btn-small" data-copy="{{$d.RelayURL}}">Copy</button></span></li>
+      <li>Click <b>Submit</b>. This panel then asks you to allow it, with the same code Home Assistant shows. Click <b>Allow</b>, and all your trackers appear in Home Assistant.</li>
+    </ol>
+    <h3>Connected</h3>
+    {{if $d.Connections}}
+    <ul class="list">
+      {{range $d.Connections}}
+      <li class="list-row">
+        <div class="grow"><b>{{.Name}}</b><span class="faint">Connected {{date .CreatedAt}}{{if .LastUsedAt}} · last update {{ago .LastUsedAt}}{{else}} · no updates yet{{end}}</span></div>
+        <form method="post" action="{{$.Base}}/connections/{{.ID}}/disconnect" data-confirm="Disconnect {{.Name}}? It asks to be linked again."><button class="btn btn-ghost">Disconnect</button></form>
+      </li>
+      {{end}}
+    </ul>
+    {{else}}<p class="faint">No Home Assistant connected yet.</p>{{end}}
+  </section>
+
+  <section class="card card-pad" id="loxone">
+    <div class="head-row"><h2>Loxone</h2>
+      {{if $d.LastRead}}<span class="badge is-home">Read {{ago $d.LastRead}}</span>{{else if $d.Downloaded}}<span class="badge">Waiting for the Miniserver</span>{{end}}
+    </div>
+    {{if not $d.LoxoneURL}}<div class="notice notice-warn">The Miniserver needs to reach the relay: publish this app's port <b>8080</b> under <b>Configuration → Network</b> and restart the app.</div>{{end}}
+    {{if $d.Outdated}}<div class="notice notice-warn"><b>Template out of date.</b> Trackers or areas changed since you downloaded it. Download it again and import it.</div>{{end}}
+    <ol class="steps">
+      <li>Download the template. It has every value of all your trackers, and this relay's private address, so keep the file to yourself.
+        <div class="actions"><a class="btn {{if or (not $d.Downloaded) $d.Outdated}}btn-primary{{else}}btn-ghost{{end}}" href="{{$.Base}}/loxone/template">Download template</a></div></li>
+      <li>In Loxone Config select <b>Virtual Inputs</b>, then <b>Virtual HTTP Input Templates → Import Template…</b> and pick <b>VI_Ciconia.xml</b>. Add <b>Ciconia</b> from the same menu and save to the Miniserver.</li>
+      <li>Use the inputs: “<i>Car</i> at <i>Home</i>” is 1 or 0; “<i>Car</i> area” is the number of the area it's in (below).</li>
+    </ol>
+    <p class="small">The Miniserver reads <span class="copy"><code class="wrap">{{$d.FeedURL}}</code><button type="button" class="btn btn-ghost btn-small" data-copy="{{$d.FeedURL}}">Copy</button></span></p>
+    <div class="numbers">
+      <div><h3>Area numbers</h3>
+        <ul><li><b>0</b> In no area</li>{{range $d.Areas}}<li><b>{{.LoxoneNumber}}</b><span class="dot" style="background:{{.Color}}"></span>{{.Name}}</li>{{end}}</ul></div>
+      <div><h3>Tracker numbers</h3>
+        <ul>{{range $d.Entries}}<li><b>t{{.LoxoneNumber}}</b>{{.Name}}</li>{{else}}<li class="faint">No trackers yet</li>{{end}}</ul></div>
+    </div>
+    <form method="post" action="{{$.Base}}/loxone/regenerate" data-confirm="Make a new address? The current one stops working at once, and you import the template again." class="actions">
+      <button class="btn btn-ghost">New address</button>
+    </form>
+  </section>
+</div>
+
+<section class="card card-pad" id="trackers">
+  <h2>Trackers</h2>
+  <p>Trackers send Teltonika Codec 8 (or 8 Extended) to this server. These are the only ports that should be reachable from the internet; keep this panel on your home network.</p>
+  <dl class="dl">
+    <div><dt>TCP</dt><dd>port <b class="mono">{{$d.Port}}</b></dd></div>
+    {{if $d.TLSPort}}
+    <div><dt>TLS</dt><dd>port <b class="mono">{{$d.TLSPort}}</b>, TLS 1.2 or newer</dd></div>
+    {{with $d.TLS}}
+    <div><dt>Certificate</dt><dd>{{if .SelfSigned}}Self-signed, made by this relay. Give it to the tracker as the CA to trust.{{else}}Your own{{end}}
+      {{if .Names}}<span class="faint">For {{range $i, $n := .Names}}{{if $i}}, {{end}}{{$n}}{{end}} · valid until {{date .NotAfter}}</span>{{end}}</dd></div>
+    <div><dt>SHA-256</dt><dd class="mono small">{{.Fingerprint}}</dd></div>
+    {{end}}
+    {{else}}
+    <div><dt>TLS</dt><dd class="faint">Off</dd></div>
+    {{end}}
+  </dl>
+  {{if $d.TLS}}<a class="btn btn-ghost" href="{{$.Base}}/tls/certificate.pem">Download the certificate</a>{{end}}
+</section>
+{{end}}

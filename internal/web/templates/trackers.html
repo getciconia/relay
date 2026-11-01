@@ -1,0 +1,52 @@
+{{define "content"}}{{$d := .Data}}
+<div class="head-row">
+  <h1>Trackers</h1>
+</div>
+
+{{if $d.Waiting}}
+<section class="card card-pad waiting">
+  <h2>Waiting to be added</h2>
+  <p class="sub">These trackers connected but aren't added yet, so the relay refuses them and stores nothing. Add the ones that are yours; they send their positions the next time they connect.</p>
+  <ul class="list">
+  {{range $d.Waiting}}
+    <li class="list-row">
+      <div class="grow"><b class="mono">{{.IMEI}}</b><span class="faint">IMEI · last tried {{ago .LastSeenAt}}</span></div>
+      <form method="post" action="{{$.Base}}/trackers/{{.ID}}/add" class="inline-form">
+        <label class="visually-hidden" for="name-{{.ID}}">Name</label>
+        <input id="name-{{.ID}}" name="name" placeholder="Name, e.g. Car" maxlength="40" required>
+        <button class="btn btn-primary">Add</button>
+      </form>
+      <form method="post" action="{{$.Base}}/trackers/{{.ID}}/dismiss"><button class="btn btn-ghost" title="Remove from the list">Dismiss</button></form>
+    </li>
+  {{end}}
+  </ul>
+</section>
+{{end}}
+
+{{if $d.Trackers}}
+<div class="map map-wide" data-map data-pins='{{json $d.Pins}}' data-areas='{{json $d.Areas}}'></div>
+<section class="card">
+  <table class="table">
+    <thead><tr><th>Tracker</th><th>State</th><th>Last position</th><th class="hide-phone">Battery</th><th class="hide-phone">GSM</th><th class="hide-phone">GPS</th></tr></thead>
+    <tbody>
+    {{range $d.Trackers}}
+      <tr>
+        <td><a href="{{$.Base}}/trackers/{{.ID}}"><b>{{.Name}}</b></a></td>
+        <td><span class="badge is-{{.State}}">{{.Badge}}</span></td>
+        <td class="muted">{{if .Updated}}{{.Updated}}{{else}}-{{end}}</td>
+        <td class="hide-phone">{{num .Position.BatteryLevel " %"}}</td>
+        <td class="hide-phone">{{int .Position.GSMSignal "/5"}}</td>
+        <td class="hide-phone">{{int .Position.GPSSignal "/5"}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</section>
+{{else if not $d.Waiting}}
+<section class="card card-pad empty">
+  <h2>No trackers yet</h2>
+  <p>Point a tracker at this server, port <b class="mono">{{$d.Port}}</b> (Teltonika Codec 8 over TCP). When it connects it shows up here, waiting for you to add it.</p>
+</section>
+{{end}}
+<script>window.addEventListener("load", () => Panel.autoRefresh(30))</script>
+{{end}}

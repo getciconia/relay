@@ -1,0 +1,11 @@
+{{define "content"}}{{$d := .Data}}
+<section class="card card-pad narrow">
+  {{if $d.Allowed}}
+    <h1>Done</h1>
+    <p>Go back to {{$d.Client}}. It finishes by itself in a few seconds. You can close this page.</p>
+  {{else}}
+    <h1>Denied</h1>
+    <p>{{$d.Client}} won't get access. Start again there if that was a mistake.</p>
+  {{end}}
+</section>
+{{end}}

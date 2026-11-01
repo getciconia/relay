@@ -1,0 +1,22 @@
+{{define "content"}}{{$d := .Data}}
+<section class="card card-pad narrow">
+  {{if $d.Request}}
+    <h1>Allow {{$d.Request.ClientName}} to see your trackers?</h1>
+    <p class="code">{{$d.Request.DisplayCode}}</p>
+    <p class="sub">Check that Home Assistant shows the same code. It then sees every tracker on this relay, and new ones too.</p>
+    <form method="post" action="{{$.Base}}/link" class="actions">
+      <input type="hidden" name="code" value="{{$d.Request.DisplayCode}}">
+      <button class="btn btn-primary btn-large" name="decision" value="allow">Allow</button>
+      <button class="btn btn-ghost btn-large" name="decision" value="deny">Deny</button>
+    </form>
+  {{else}}
+    <h1>Enter the code from Home Assistant</h1>
+    {{if $d.Expired}}<div class="notice notice-warn">That code has expired or was already used. Codes last 10 minutes; start again in Home Assistant to get a new one.</div>{{end}}
+    <form method="get" action="{{$.Base}}/link" class="form">
+      <label for="code">Code</label>
+      <input id="code" name="code" placeholder="XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" class="code-input" required autofocus>
+      <div class="actions"><button class="btn btn-primary">Continue</button></div>
+    </form>
+  {{end}}
+</section>
+{{end}}

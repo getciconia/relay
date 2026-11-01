@@ -1,0 +1,29 @@
+{{define "content"}}{{$d := .Data}}
+<p class="back"><a href="{{$.Base}}/areas">← Areas</a></p>
+<h1>{{.Title}}</h1>
+<div class="grid area-editor" data-area-editor data-others='{{json $d.Others}}'>
+  <div class="map map-tall" data-area-map></div>
+  <section class="card card-pad">
+    <form method="post" action="{{$.Base}}{{if $d.New}}/areas{{else}}/areas/{{$d.Area.ID}}{{end}}" class="form" id="area-form">
+      {{if $d.Error}}<div class="notice notice-warn" role="alert">{{$d.Error}}</div>{{end}}
+      <p class="hint" data-area-hint {{if $d.Area.Latitude}}hidden{{end}}>Click the map to place the area.</p>
+      <input type="hidden" name="latitude" value="{{if $d.Area.Latitude}}{{$d.Area.Latitude}}{{end}}" data-lat>
+      <input type="hidden" name="longitude" value="{{if $d.Area.Longitude}}{{$d.Area.Longitude}}{{end}}" data-lng>
+      <label for="name">Name</label>
+      <input id="name" name="name" value="{{$d.Area.Name}}" maxlength="40" placeholder="e.g. Home" required>
+      <label for="radius">Radius <span class="faint" data-radius-label>{{$d.Area.Radius}} m</span></label>
+      <input id="radius" type="range" name="radius" min="25" max="5000" step="5" value="{{$d.Area.Radius}}" data-radius>
+      <span class="label">Colour</span>
+      <div class="swatches">
+        {{range $d.Colors}}<label class="swatch" style="--swatch:{{.}}"><input type="radio" name="color" value="{{.}}" {{if eq . $d.Area.Color}}checked{{end}} data-color><span></span></label>{{end}}
+      </div>
+      <div class="actions"><button class="btn btn-primary">Save</button></div>
+    </form>
+    {{if not $d.New}}
+    <form method="post" action="{{$.Base}}/areas/{{$d.Area.ID}}/delete" data-confirm="Delete {{$d.Area.Name}}?" class="actions">
+      <button class="btn btn-danger">Delete area</button>
+    </form>
+    {{end}}
+  </section>
+</div>
+{{end}}

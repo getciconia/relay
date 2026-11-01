@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Go tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Formatting
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -race ./...
+
+  docker:
+    name: Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Build
+        run: docker build --build-arg VERSION=${GITHUB_SHA::7} -t ciconia-relay .
+
+      - name: The fake trackers are in the image
+        run: docker run --rm --entrypoint fake-tracker ciconia-relay -h
+
+      - name: It starts and answers
+        run: |
+          docker run -d --name relay -p 8080:8080 -p 5027:5027 ciconia-relay
+          for i in $(seq 1 20); do curl -fs http://localhost:8080/healthz && exit 0; sleep 1; done
+          docker logs relay; exit 1
+
+  app:
+    name: App under AppArmor
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Put the app together
+        run: ciconia_relay/make-app.sh
+
+      - name: Build it
+        run: docker build --build-arg BUILD_VERSION=ci -t ciconia-relay-app dist/ciconia_relay
+
+      - name: Load the AppArmor profile the way the Supervisor does
+        run: |
+          sed 's/^profile ciconia_relay /profile local_ciconia_relay /' ciconia_relay/apparmor.txt > "$RUNNER_TEMP/apparmor.txt"
+          sudo apparmor_parser -r -W "$RUNNER_TEMP/apparmor.txt"
+          sudo aa-status | grep local_ciconia_relay
+
+      - name: Start it confined
+        run: |
+          docker run -d --name app --hostname local-ciconia-relay \
+            --security-opt apparmor=local_ciconia_relay \
+            -v app-data:/data -p 8080:8080 -p 5027:5027 -p 5028:5028 ciconia-relay-app
+          for i in $(seq 1 30); do curl -fs http://localhost:8080/healthz && exit 0; sleep 1; done
+          docker logs app; exit 1
+
+      - name: Trackers send over TCP and TLS
+        run: |
+          go build -o "$RUNNER_TEMP/fake" ./cmd/fake-tracker
+          fake="$RUNNER_TEMP/fake"
+          # Unknown first: refused and waiting in the panel.
+          timeout 5 "$fake" -addr localhost:5027 -count 1 || true
+          curl -fsS http://localhost:8080/ | grep -q 'trackers/1/add'
+          curl -fsS -o /dev/null -H 'Sec-Fetch-Site: same-origin' --data-urlencode name=CI http://localhost:8080/trackers/1/add
+          timeout 60 "$fake" -addr localhost:5027 -count 2 -every 1s
+          curl -fsS -o "$RUNNER_TEMP/ca.pem" http://localhost:8080/tls/certificate.pem
+          timeout 60 "$fake" -addr localhost:5028 -tls -ca "$RUNNER_TEMP/ca.pem" -count 2 -every 1s
+          curl -fsS http://localhost:8080/trackers/1 | tr -d '\n' | grep -Eq 'Stored positions</dt><dd>[1-9]'
+
+      - name: Restarts cleanly
+        run: |
+          docker restart app
+          for i in $(seq 1 30); do curl -fs http://localhost:8080/healthz && exit 0; sleep 1; done
+          docker logs app; exit 1
+
+      - name: No AppArmor denials
+        run: |
+          if sudo journalctl -k --no-pager | grep 'apparmor="DENIED"' | grep local_ciconia_relay; then
+            exit 1
+          fi
+
+      - name: Logs
+        if: always()
+        run: docker logs app 2>&1 | tail -50

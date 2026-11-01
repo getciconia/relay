@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} · Ciconia Relay</title>
+<link rel="icon" href="{{$.Base}}/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="{{$.Base}}/static/leaflet/leaflet.css">
+<link rel="stylesheet" href="{{$.Base}}/static/panel.css">
+<script src="{{$.Base}}/static/leaflet/leaflet.js" defer></script>
+<script src="{{$.Base}}/static/panel.js" defer></script>
+</head>
+<body data-tiles="{{.Tiles}}" data-base="{{.Base}}">
+<header class="top">
+  <a class="brand" href="{{$.Base}}/">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><path class="logo-beak" d="M20.6 10.4 L31 14.2 L20.4 15.6 Z"/><path class="logo-pin" d="M13 30.5s-9-10.3-9-17a9 9 0 0 1 18 0c0 6.7-9 17-9 17z"/><circle class="logo-eye" cx="14.2" cy="12.2" r="2.6"/></svg>
+    <span>Ciconia <b>Relay</b></span>
+  </a>
+  <nav class="nav">
+    <a href="{{$.Base}}/" {{if eq .Nav "trackers"}}aria-current="page"{{end}}>Trackers</a>
+    <a href="{{$.Base}}/areas" {{if eq .Nav "areas"}}aria-current="page"{{end}}>Areas</a>
+    <a href="{{$.Base}}/integrations" {{if eq .Nav "integrations"}}aria-current="page"{{end}}>Integrations</a>
+  </nav>
+</header>
+<main class="page">
+  {{range .Pending}}
+  <div class="notice approve" role="alert">
+    <div class="grow"><b>{{.ClientName}} wants to see your trackers.</b> Allow it if Home Assistant shows the code <b class="mono">{{.DisplayCode}}</b>.</div>
+    <form method="post" action="{{$.Base}}/link" class="inline-form">
+      <input type="hidden" name="code" value="{{.DisplayCode}}">
+      <button class="btn btn-primary" name="decision" value="allow">Allow</button>
+      <button class="btn btn-ghost" name="decision" value="deny">Deny</button>
+    </form>
+  </div>
+  {{end}}
+  {{if .Notice}}<div class="notice" role="status">{{.Notice}}</div>{{end}}
+  {{template "content" .}}
+</main>
+<footer class="foot">Ciconia Relay {{.Version}} · self-hosted, your positions stay on this server</footer>
+</body>
+</html>

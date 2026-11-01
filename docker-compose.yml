@@ -1,0 +1,33 @@
+# Ciconia Relay with Docker Compose: `docker compose up -d`, then open
+# http://<this machine>:8080. Forward only ports 5027 and 5028 in your router.
+# Ports taken? RELAY_TRACKER_PORT=5127 RELAY_TRACKER_TLS_PORT=5128 RELAY_PANEL_PORT=8081 docker compose up -d
+services:
+  relay:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${RELAY_TRACKER_PORT:-5027}:5027" # trackers over TCP: open to the internet
+      - "${RELAY_TRACKER_TLS_PORT:-5028}:5028" # trackers over TLS: open to the internet
+      - "${RELAY_PANEL_PORT:-8080}:8080" # panel, Home Assistant, Loxone: home network only
+    volumes:
+      - relay-data:/data
+    environment:
+      TZ: Europe/Warsaw
+      RELAY_RETENTION_DAYS: "7"
+      # RELAY_LOG_PACKETS: "true"   # log every packet as hex
+      # RELAY_TLS_HOSTS: "relay.example.com"   # names in the self-signed TLS certificate
+      # Your own certificate instead (mount it, e.g. - /etc/letsencrypt:/certs:ro):
+      # RELAY_TLS_CERT: /certs/live/relay.example.com/fullchain.pem
+      # RELAY_TLS_KEY: /certs/live/relay.example.com/privkey.pem
+
+  # Three fake ATM700s for trying it out: docker compose --profile demo up -d
+  # They wait until you add them in the panel.
+  fake-trackers:
+    profiles: [demo]
+    build: .
+    entrypoint: ["fake-tracker", "-addr", "relay:5027", "-n", "3", "-every", "5s"]
+    depends_on: [relay]
+    restart: unless-stopped
+
+volumes:
+  relay-data:

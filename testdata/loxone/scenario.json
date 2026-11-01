@@ -1,0 +1,42 @@
+{
+  "comment": "Shared by the relay (Go) and the cloud backend (Ruby): both must turn this into feed.txt and template.xml exactly.",
+  "now": "2026-10-31T12:00:00Z",
+  "feed_url": "https://relay.example/loxone/feed/cil_test",
+  "areas": [
+    {"number": 1, "name": "Home", "latitude": 52.2296756, "longitude": 21.0122287, "radius": 100},
+    {"number": 2, "name": "Work & Co", "latitude": 52.25, "longitude": 21.0, "radius": 300},
+    {"number": 3, "name": "Town \"centre\" <it's>", "latitude": 52.23, "longitude": 21.01, "radius": 5000}
+  ],
+  "trackers": [
+    {
+      "number": 1,
+      "name": "Dad's Car",
+      "position": {
+        "latitude": 52.2297, "longitude": 21.0123, "altitude": 112.4, "speed": 37.4,
+        "battery_level": 87.4, "gsm_signal": 4, "gsm_operator_code": 26003, "chip_temperature": 23.45,
+        "satellites": 11, "gps_signal": 5, "fixed_time": "2026-10-31T11:59:40Z", "fix_age_seconds": 20
+      }
+    },
+    {
+      "number": 2,
+      "name": "Bike",
+      "position": {
+        "battery_level": 15, "gsm_signal": 2, "gsm_operator_code": 26002
+      }
+    },
+    {
+      "number": 3,
+      "name": "Boat",
+      "position": {
+        "latitude": 54.35, "longitude": 18.65, "altitude": -3.5, "speed": 12.6,
+        "battery_level": 255, "chip_temperature": 23.0, "satellites": 4,
+        "fixed_time": "2026-10-29T08:00:00Z", "fix_age_seconds": 187200
+      }
+    },
+    {
+      "number": 4,
+      "name": "New",
+      "position": null
+    }
+  ]
+}
