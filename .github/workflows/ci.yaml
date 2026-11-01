@@ -50,7 +50,7 @@ jobs:
 
       - name: It starts and answers
         run: |
-          docker run -d --name relay -p 8080:8080 -p 5027:5027 ciconia-relay
+          docker run -d --name relay -p 8080:8080 -p 7171:7171 ciconia-relay
           for i in $(seq 1 20); do curl -fs http://localhost:8080/healthz && exit 0; sleep 1; done
           docker logs relay; exit 1
 
@@ -83,7 +83,7 @@ jobs:
         run: |
           docker run -d --name app --hostname local-ciconia-relay \
             --security-opt apparmor=local_ciconia_relay \
-            -v app-data:/data -p 8080:8080 -p 5027:5027 -p 5028:5028 ciconia-relay-app
+            -v app-data:/data -p 8080:8080 -p 7171:7171 -p 7172:7172 ciconia-relay-app
           for i in $(seq 1 30); do curl -fs http://localhost:8080/healthz && exit 0; sleep 1; done
           docker logs app; exit 1
 
@@ -92,12 +92,12 @@ jobs:
           go build -o "$RUNNER_TEMP/fake" ./cmd/fake-tracker
           fake="$RUNNER_TEMP/fake"
           # Unknown first: refused and waiting in the panel.
-          timeout 5 "$fake" -addr localhost:5027 -count 1 || true
+          timeout 5 "$fake" -addr localhost:7171 -count 1 || true
           curl -fsS http://localhost:8080/ | grep -q 'trackers/1/add'
           curl -fsS -o /dev/null -H 'Sec-Fetch-Site: same-origin' --data-urlencode name=CI http://localhost:8080/trackers/1/add
-          timeout 60 "$fake" -addr localhost:5027 -count 2 -every 1s
+          timeout 60 "$fake" -addr localhost:7171 -count 2 -every 1s
           curl -fsS -o "$RUNNER_TEMP/ca.pem" http://localhost:8080/tls/certificate.pem
-          timeout 60 "$fake" -addr localhost:5028 -tls -ca "$RUNNER_TEMP/ca.pem" -count 2 -every 1s
+          timeout 60 "$fake" -addr localhost:7172 -tls -ca "$RUNNER_TEMP/ca.pem" -count 2 -every 1s
           curl -fsS http://localhost:8080/trackers/1 | tr -d '\n' | grep -Eq 'Stored positions</dt><dd>[1-9]'
 
       - name: Restarts cleanly

@@ -144,7 +144,7 @@ func run() error {
 			log.Info("tracker TLS certificate", "self_signed", info.SelfSigned, "names", strings.Join(info.Names, ","), "sha256", info.Fingerprint)
 		}
 	}
-	log.Info("Ciconia Relay started", "version", version, "trackers", cfg.TrackerAddr, "trackers_tls", tlsAddr, "panel", cfg.HTTPAddr,
+	log.Info("Ciconia Private Relay started", "version", version, "trackers", cfg.TrackerAddr, "trackers_tls", tlsAddr, "panel", cfg.HTTPAddr,
 		"database", cfg.DBPath, "keep_positions", cfg.Retention.String(), "mqtt", cfg.MQTTURL != "")
 
 	select {

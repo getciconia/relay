@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- The tracker ports are now **7171** (TCP) and **7172** (TLS), instead of
+  5027 and 5028. Point your trackers at the new port and forward it in your
+  router.
+
 ## 0.2.0
 
 - Each tracker links to its device page in Home Assistant.

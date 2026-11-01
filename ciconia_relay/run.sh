@@ -1,10 +1,10 @@
 #!/command/with-contenv bashio
-# Starts Ciconia Relay with the app's options. Every lookup falls back to a
+# Starts Ciconia Private Relay with the app's options. Every lookup falls back to a
 # default, so the relay always starts.
 
 export RELAY_DB=/data/relay.db
-export RELAY_TRACKER_ADDR=:5027
-export RELAY_TRACKER_TLS_ADDR=:5028
+export RELAY_TRACKER_ADDR=:7171
+export RELAY_TRACKER_TLS_ADDR=:7172
 export RELAY_HTTP_ADDR=:8080
 # The panel leaves out Loxone and links trackers to their Home Assistant
 # devices (with the Supervisor's token, SUPERVISOR_TOKEN).
@@ -70,5 +70,5 @@ if [ -n "${port}" ] && [ "${port}" != "null" ]; then
   fi
 fi
 
-bashio::log.info "Trackers: ports 5027 (TCP) and 5028 (TLS). Home Assistant: ${RELAY_HA_URL}. MQTT: ${RELAY_MQTT_URL:-off}"
+bashio::log.info "Trackers: ports 7171 (TCP) and 7172 (TLS). Home Assistant: ${RELAY_HA_URL}. MQTT: ${RELAY_MQTT_URL:-off}"
 exec /usr/bin/relay

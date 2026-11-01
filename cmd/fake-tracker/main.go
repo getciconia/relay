@@ -2,9 +2,9 @@
 // connects to a relay, says its IMEI and sends a position now and then. For
 // trying the relay without real trackers.
 //
-//	go run ./cmd/fake-tracker -addr localhost:5027            # one tracker, driving
-//	go run ./cmd/fake-tracker -addr localhost:5027 -n 3       # driving, parked at the centre, parked elsewhere
-//	go run ./cmd/fake-tracker -addr localhost:5028 -tls -ca ciconia-relay.pem   # over TLS
+//	go run ./cmd/fake-tracker -addr localhost:7171            # one tracker, driving
+//	go run ./cmd/fake-tracker -addr localhost:7171 -n 3       # driving, parked at the centre, parked elsewhere
+//	go run ./cmd/fake-tracker -addr localhost:7172 -tls -ca ciconia-relay.pem   # over TLS
 //
 // A tracker the relay doesn't know is refused until it's added in the panel;
 // the fake keeps trying every 10 seconds, like a real one.
@@ -50,7 +50,7 @@ type fake struct {
 }
 
 func main() {
-	addr := flag.String("addr", "localhost:5027", "relay's tracker address")
+	addr := flag.String("addr", "localhost:7171", "relay's tracker address")
 	imei := flag.String("imei", "356307042441013", "IMEI of the first tracker; the others count up from it")
 	n := flag.Int("n", 1, "how many trackers")
 	lat := flag.Float64("lat", 52.2296756, "centre latitude")

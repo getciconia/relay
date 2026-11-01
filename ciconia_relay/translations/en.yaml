@@ -30,6 +30,6 @@ configuration:
     name: Map tiles
     description: Tile address for the panel's maps. Leave empty for OpenStreetMap.
 network:
-  5027/tcp: Trackers, Codec 8 over TCP. Forward this port to the internet.
-  5028/tcp: Trackers, Codec 8 over TLS. Forward this port to the internet.
+  7171/tcp: Trackers, Codec 8 over TCP. Forward this port to the internet.
+  7172/tcp: Trackers, Codec 8 over TLS. Forward this port to the internet.
   8080/tcp: For other devices on your home network that read the relay. Home Assistant itself doesn't need it.

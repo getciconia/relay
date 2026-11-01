@@ -1,13 +1,13 @@
-# Ciconia Relay with Docker Compose: `docker compose up -d`, then open
-# http://<this machine>:8080. Forward only ports 5027 and 5028 in your router.
-# Ports taken? RELAY_TRACKER_PORT=5127 RELAY_TRACKER_TLS_PORT=5128 RELAY_PANEL_PORT=8081 docker compose up -d
+# Ciconia Private Relay with Docker Compose: `docker compose up -d`, then open
+# http://<this machine>:8080. Forward only ports 7171 and 7172 in your router.
+# Ports taken? RELAY_TRACKER_PORT=7271 RELAY_TRACKER_TLS_PORT=7272 RELAY_PANEL_PORT=8081 docker compose up -d
 services:
   relay:
     build: .
     restart: unless-stopped
     ports:
-      - "${RELAY_TRACKER_PORT:-5027}:5027" # trackers over TCP: open to the internet
-      - "${RELAY_TRACKER_TLS_PORT:-5028}:5028" # trackers over TLS: open to the internet
+      - "${RELAY_TRACKER_PORT:-7171}:7171" # trackers over TCP: open to the internet
+      - "${RELAY_TRACKER_TLS_PORT:-7172}:7172" # trackers over TLS: open to the internet
       - "${RELAY_PANEL_PORT:-8080}:8080" # panel, Home Assistant, Loxone: home network only
     volumes:
       - relay-data:/data
@@ -25,7 +25,7 @@ services:
   fake-trackers:
     profiles: [demo]
     build: .
-    entrypoint: ["fake-tracker", "-addr", "relay:5027", "-n", "3", "-every", "5s"]
+    entrypoint: ["fake-tracker", "-addr", "relay:7171", "-n", "3", "-every", "5s"]
     depends_on: [relay]
     restart: unless-stopped
 

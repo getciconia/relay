@@ -1,4 +1,4 @@
-# Ciconia Relay as a Home Assistant app. The build context is the folder
+# Ciconia Private Relay as a Home Assistant app. The build context is the folder
 # make-app.sh puts together: this file, run.sh and the relay's source in src/.
 ARG BUILD_FROM=ghcr.io/home-assistant/base:3.24
 
@@ -22,7 +22,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
 CMD ["/run.sh"]
 
 LABEL \
-    org.opencontainers.image.title="Home Assistant App: Ciconia Relay" \
+    org.opencontainers.image.title="Home Assistant App: Ciconia Private Relay" \
     org.opencontainers.image.description="Receive your GPS trackers yourself and see them in Home Assistant." \
     org.opencontainers.image.source="https://github.com/getciconia/relay" \
     org.opencontainers.image.licenses="MIT"

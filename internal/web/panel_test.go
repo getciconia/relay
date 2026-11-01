@@ -42,7 +42,7 @@ func setupWith(t *testing.T, configure func(*Panel)) *env {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	mux := http.NewServeMux()
 	(&api.API{Store: st, Log: log}).Register(mux)
-	panel := &Panel{Store: st, Log: log, TrackerPort: "5027", Version: "test"}
+	panel := &Panel{Store: st, Log: log, TrackerPort: "7171", Version: "test"}
 	configure(panel)
 	if err := panel.Register(mux); err != nil {
 		t.Fatal(err)
@@ -95,7 +95,7 @@ func contains(t *testing.T, body string, want ...string) {
 func TestTrackersFlow(t *testing.T) {
 	e := setup(t)
 	_, body := e.get("/")
-	contains(t, body, "No trackers yet", "port <b class=\"mono\">5027</b>")
+	contains(t, body, "No trackers yet", "port <b class=\"mono\">7171</b>")
 
 	waiting, _ := e.st.Knock(ctx, "356307042441013")
 	_, body = e.get("/")
@@ -343,9 +343,9 @@ func TestTLSCertificateInThePanel(t *testing.T) {
 		t.Fatal(err)
 	}
 	info, _ := certs.Info()
-	e := setupWith(t, func(p *Panel) { p.TLS, p.TLSPort = certs, "5028" })
+	e := setupWith(t, func(p *Panel) { p.TLS, p.TLSPort = certs, "7172" })
 	_, body := e.get("/integrations")
-	contains(t, body, "port <b class=\"mono\">5028</b>", info.Fingerprint, "Self-signed", "relay.example")
+	contains(t, body, "port <b class=\"mono\">7172</b>", info.Fingerprint, "Self-signed", "relay.example")
 	status, pem := e.get("/tls/certificate.pem")
 	if status != 200 || pem != string(info.PEM) {
 		t.Errorf("download %d %q", status, pem)

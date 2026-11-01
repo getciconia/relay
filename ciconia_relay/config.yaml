@@ -1,7 +1,7 @@
-name: Ciconia Relay
-version: "0.2.0"
+name: Ciconia Private Relay
+version: "0.3.0"
 slug: ciconia_relay
-description: Receive your GPS trackers yourself and see them in Home Assistant. No cloud.
+description: Your own Ciconia server in Home Assistant. Trackers report here, not to Ciconia Cloud.
 url: https://getciconia.com/docs/
 arch:
   - aarch64
@@ -15,7 +15,7 @@ image: ghcr.io/getciconia/ciconia-relay-app
 ingress: true
 ingress_port: 8080
 panel_icon: mdi:map-marker-radius
-panel_title: Ciconia Relay
+panel_title: Ciconia Private Relay
 # Reads its own published port and the machine's address, for the Loxone template.
 hassio_api: true
 # Asks Home Assistant which device is each tracker's, to link to its page.
@@ -24,8 +24,8 @@ homeassistant_api: true
 services:
   - mqtt:want
 ports:
-  5027/tcp: 5027
-  5028/tcp: 5028
+  7171/tcp: 7171
+  7172/tcp: 7172
   8080/tcp: null
 map:
   - type: ssl

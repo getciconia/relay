@@ -57,8 +57,8 @@ type Config struct {
 // Load reads the environment.
 func Load() (Config, error) {
 	c := Config{
-		TrackerAddr:    env("RELAY_TRACKER_ADDR", ":5027"),
-		TrackerTLSAddr: env("RELAY_TRACKER_TLS_ADDR", ":5028"),
+		TrackerAddr:    env("RELAY_TRACKER_ADDR", ":7171"),
+		TrackerTLSAddr: env("RELAY_TRACKER_TLS_ADDR", ":7172"),
 		TLSCert:        os.Getenv("RELAY_TLS_CERT"),
 		TLSKey:         os.Getenv("RELAY_TLS_KEY"),
 		HTTPAddr:       env("RELAY_HTTP_ADDR", ":8080"),

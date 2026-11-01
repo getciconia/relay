@@ -95,7 +95,7 @@ func (p *Publisher) discovery(e tracker.Entry) map[string]any {
 	return map[string]any{
 		"device": device,
 		"origin": map[string]any{
-			"name":        "Ciconia Relay",
+			"name":        "Ciconia Private Relay",
 			"sw_version":  p.Version,
 			"support_url": "https://getciconia.com",
 		},
