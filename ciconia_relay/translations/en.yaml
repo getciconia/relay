@@ -32,4 +32,4 @@ configuration:
 network:
   5027/tcp: Trackers, Codec 8 over TCP. Forward this port to the internet.
   5028/tcp: Trackers, Codec 8 over TLS. Forward this port to the internet.
-  8080/tcp: For Loxone and other devices on your network. Home Assistant itself doesn't need it.
+  8080/tcp: For other devices on your home network that read the relay. Home Assistant itself doesn't need it.

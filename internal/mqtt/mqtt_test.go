@@ -15,7 +15,7 @@ import (
 	"github.com/mochi-mqtt/server/v2/hooks/auth"
 	"github.com/mochi-mqtt/server/v2/listeners"
 
-	"github.com/getciconia/relay/internal/codec8"
+	"github.com/getciconia/relay/codec8"
 	"github.com/getciconia/relay/internal/store"
 )
 

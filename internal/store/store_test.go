@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/getciconia/relay/internal/codec8"
+	"github.com/getciconia/relay/codec8"
 	"github.com/getciconia/relay/internal/tracker"
 )
 

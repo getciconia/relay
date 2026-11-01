@@ -16,6 +16,6 @@ for doc in README.md DOCS.md; do
   if [ -f "$here/$doc" ]; then cp "$here/$doc" "$out/"; fi
 done
 grep -v '^image:' "$here/config.yaml" > "$out/config.yaml"
-cp -R "$relay/go.mod" "$relay/go.sum" "$relay/cmd" "$relay/internal" "$out/src/"
+cp -R "$relay/go.mod" "$relay/go.sum" "$relay/cmd" "$relay/codec8" "$relay/internal" "$out/src/"
 chmod a+x "$out/run.sh"
 echo "App ready in $out"

@@ -3,7 +3,7 @@
   <h1>Areas</h1>
   <a class="btn btn-primary" href="{{$.Base}}/areas/new">Add area</a>
 </div>
-<p class="sub page-sub">Places like Home or Work. A tracker standing still in one shows "At Home", and Loxone gets which area each tracker is in. Home Assistant uses its own zones.</p>
+<p class="sub page-sub">{{if $.HAApp}}Places like Home or Work. A tracker standing still in one shows "At Home" here. For automations, use Home Assistant's own zones.{{else}}Places like Home or Work. A tracker standing still in one shows "At Home", and Loxone gets which area each tracker is in. Home Assistant uses its own zones.{{end}}</p>
 {{if $d.Areas}}
 <div class="map map-wide" data-map data-areas='{{json $d.Map}}'></div>
 <section class="card">
@@ -11,7 +11,7 @@
   {{range $d.Areas}}
     <li class="list-row">
       <span class="dot" style="background:{{.Color}}"></span>
-      <a class="grow" href="{{$.Base}}/areas/{{.ID}}"><b>{{.Name}}</b><span class="faint">{{.Radius}} m radius · Loxone number {{.LoxoneNumber}}</span></a>
+      <a class="grow" href="{{$.Base}}/areas/{{.ID}}"><b>{{.Name}}</b><span class="faint">{{.Radius}} m radius{{if not $.HAApp}} · Loxone number {{.LoxoneNumber}}{{end}}</span></a>
     </li>
   {{end}}
   </ul>
@@ -19,7 +19,7 @@
 {{else}}
 <section class="card card-pad empty">
   <h2>No areas yet</h2>
-  <p>Draw one around your home to see "At Home" and to give Loxone something to switch on.</p>
+  <p>{{if $.HAApp}}Draw one around your home to see "At Home".{{else}}Draw one around your home to see "At Home" and to give Loxone something to switch on.{{end}}</p>
   <a class="btn btn-primary" href="{{$.Base}}/areas/new">Add your first area</a>
 </section>
 {{end}}

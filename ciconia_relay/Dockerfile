@@ -23,6 +23,6 @@ CMD ["/run.sh"]
 
 LABEL \
     org.opencontainers.image.title="Home Assistant App: Ciconia Relay" \
-    org.opencontainers.image.description="Receive your GPS trackers yourself and see them in Home Assistant and Loxone." \
+    org.opencontainers.image.description="Receive your GPS trackers yourself and see them in Home Assistant." \
     org.opencontainers.image.source="https://github.com/getciconia/relay" \
     org.opencontainers.image.licenses="MIT"

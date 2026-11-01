@@ -15,9 +15,10 @@ import (
 
 type trackerRow struct {
 	tracker.Entry
-	Badge   string
-	State   string
-	Updated string
+	Badge    string
+	State    string
+	Updated  string
+	HADevice string // its device in Home Assistant, for a link; "" for none
 }
 
 func (p *Panel) trackers(w http.ResponseWriter, r *http.Request) {
@@ -34,8 +35,9 @@ func (p *Panel) trackers(w http.ResponseWriter, r *http.Request) {
 	}
 	rows := make([]trackerRow, 0, len(entries))
 	pins := make([]mapTracker, 0, len(entries))
+	devices := p.haDevices(r)
 	for _, e := range entries {
-		row := trackerRow{Entry: e, Badge: e.Status.Badge(), State: stateClass(e.Status)}
+		row := trackerRow{Entry: e, Badge: e.Status.Badge(), State: stateClass(e.Status), HADevice: devices[e.PublicID]}
 		if e.Position.FixAgeSeconds != nil {
 			row.Updated = tracker.Ago(*e.Position.FixAgeSeconds)
 		}
@@ -128,7 +130,7 @@ func (p *Panel) showTracker(w http.ResponseWriter, r *http.Request) {
 	}
 	p.render(w, r, "tracker", e.Name, "trackers", map[string]any{
 		"E": e, "T": t, "Badge": e.Status.Badge(), "State": stateClass(e.Status), "Updated": updated, "Count": count,
-		"Pins": pins, "Areas": mapAreas(areas), "Loxone": lox,
+		"Pins": pins, "Areas": mapAreas(areas), "Loxone": lox, "HADevice": p.haDevices(r)[e.PublicID],
 	})
 }
 

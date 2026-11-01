@@ -5,6 +5,7 @@
 package web
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"errors"
@@ -45,6 +46,13 @@ type Panel struct {
 	LoxoneURL   string                            // the address the Miniserver uses, likewise
 	LoxonePort  string                            // as a Home Assistant app: the host port 8080 is published on ("" = not published)
 	MQTT        interface{ Status() mqtt.Status } // nil: MQTT is off
+	// HAApp: running as a Home Assistant app. The panel then leaves out
+	// Loxone (the feed and template URLs still work) and, with HADevices,
+	// links trackers to their devices in Home Assistant.
+	HAApp     bool
+	HADevices interface {
+		All(ctx context.Context) map[string]string // public ID → Home Assistant device ID
+	}
 
 	pages map[string]*template.Template
 }
@@ -187,6 +195,7 @@ type page struct {
 	Version string
 	Tiles   string
 	Base    string              // path prefix when served through Home Assistant's ingress
+	HAApp   bool                // a Home Assistant app: no Loxone in the panel
 	Pending []store.LinkRequest // Home Assistants waiting for approval
 	Data    any
 }
@@ -214,7 +223,7 @@ func (p *Panel) render(w http.ResponseWriter, r *http.Request, name, title, nav 
 		p.Log.Error("pending links", "err", err)
 	}
 	pg := page{Title: title, Nav: nav, Notice: notices[r.URL.Query().Get("n")], Version: p.Version, Tiles: p.tiles(),
-		Base: base(r), Pending: pending, Data: data}
+		Base: base(r), HAApp: p.HAApp, Pending: pending, Data: data}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := t.Execute(w, pg); err != nil {
 		p.Log.Error("render", "page", name, "err", err)
@@ -248,6 +257,17 @@ func redirect(w http.ResponseWriter, r *http.Request, path, notice string) {
 }
 
 var ingressPath = regexp.MustCompile(`^/api/hassio_ingress/[A-Za-z0-9_-]+$`)
+
+// haDevices maps trackers' public IDs to their Home Assistant device IDs,
+// for links to their device pages. Empty unless the panel is open inside
+// Home Assistant (through ingress), where /config/devices/... is Home
+// Assistant's own page.
+func (p *Panel) haDevices(r *http.Request) map[string]string {
+	if p.HADevices == nil || base(r) == "" {
+		return nil
+	}
+	return p.HADevices.All(r.Context())
+}
 
 // base is the path prefix the browser sees: Home Assistant's ingress serves
 // an app's panel under /api/hassio_ingress/<token>, and says so in
@@ -318,9 +338,10 @@ func (p *Panel) loxoneOutdated(r *http.Request) bool {
 }
 
 // afterChange redirects, adding the Loxone reminder when the change made a
-// downloaded template out of date.
+// downloaded template out of date (not as a Home Assistant app, whose panel
+// doesn't show Loxone).
 func (p *Panel) afterChange(w http.ResponseWriter, r *http.Request, path, notice string) {
-	if p.loxoneOutdated(r) {
+	if !p.HAApp && p.loxoneOutdated(r) {
 		notice = "loxone"
 	}
 	redirect(w, r, path, notice)

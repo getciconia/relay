@@ -31,7 +31,7 @@
     <tbody>
     {{range $d.Trackers}}
       <tr>
-        <td><a href="{{$.Base}}/trackers/{{.ID}}"><b>{{.Name}}</b></a></td>
+        <td><a href="{{$.Base}}/trackers/{{.ID}}"><b>{{.Name}}</b></a>{{if .HADevice}}<a class="faint" href="/config/devices/device/{{.HADevice}}" target="_top">Device in Home Assistant ↗</a>{{end}}</td>
         <td><span class="badge is-{{.State}}">{{.Badge}}</span></td>
         <td class="muted">{{if .Updated}}{{.Updated}}{{else}}-{{end}}</td>
         <td class="hide-phone">{{num .Position.BatteryLevel " %"}}</td>

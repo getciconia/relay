@@ -1,8 +1,8 @@
 {{define "content"}}{{$d := .Data}}
-<h1>Home Assistant &amp; Loxone</h1>
-<div class="grid">
+<h1>{{if $.HAApp}}Home Assistant{{else}}Home Assistant &amp; Loxone{{end}}</h1>
+<div class="{{if $.HAApp}}stack{{else}}grid{{end}}">
   <section class="card card-pad">
-    <h2>Home Assistant</h2>
+    {{if not $.HAApp}}<h2>Home Assistant</h2>{{end}}
     {{with $d.MQTT}}
     <div class="head-row"><h3>Through MQTT</h3><span class="badge{{if .Connected}} is-home{{end}}">{{if .Connected}}Connected{{else}}Not connected{{end}}</span></div>
     <p>Your trackers appear in Home Assistant by themselves, each as a device with its location and sensors, through the MQTT broker <code>{{.Broker}}</code>. You don't need the Ciconia integration for this relay: use one or the other, or every tracker shows up twice.</p>
@@ -29,6 +29,7 @@
     {{else}}<p class="faint">No Home Assistant connected yet.</p>{{end}}
   </section>
 
+  {{if not $.HAApp}}
   <section class="card card-pad" id="loxone">
     <div class="head-row"><h2>Loxone</h2>
       {{if $d.LastRead}}<span class="badge is-home">Read {{ago $d.LastRead}}</span>{{else if $d.Downloaded}}<span class="badge">Waiting for the Miniserver</span>{{end}}
@@ -52,6 +53,7 @@
       <button class="btn btn-ghost">New address</button>
     </form>
   </section>
+  {{end}}
 </div>
 
 <section class="card card-pad" id="trackers">

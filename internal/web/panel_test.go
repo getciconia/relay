@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/getciconia/relay/codec8"
 	"github.com/getciconia/relay/internal/api"
-	"github.com/getciconia/relay/internal/codec8"
 	"github.com/getciconia/relay/internal/mqtt"
 	"github.com/getciconia/relay/internal/store"
 	"github.com/getciconia/relay/internal/tlscert"
@@ -391,5 +391,60 @@ func TestMQTTInThePanel(t *testing.T) {
 	contains(t, body, "Through MQTT", "Not connected", "mqtt://core-mosquitto:1883", "not authorized", "Or with the Ciconia integration")
 	if _, body := setup(t).get("/integrations"); strings.Contains(body, "Through MQTT") {
 		t.Error("MQTT shown while it's off")
+	}
+}
+
+type fakeDevices map[string]string
+
+func (f fakeDevices) All(context.Context) map[string]string { return f }
+
+// As a Home Assistant app: no Loxone anywhere in the panel (its feed and
+// template still work), and trackers link to their Home Assistant devices.
+func TestAsHomeAssistantApp(t *testing.T) {
+	devices := fakeDevices{}
+	e := setupWith(t, func(p *Panel) { p.HAApp, p.HADevices = true, devices })
+	tr, _ := e.st.Knock(ctx, "356307042441013")
+	e.st.AddTracker(ctx, tr.ID, "Car")
+	e.st.SavePositions(ctx, tr.ID, []codec8.Record{{Time: time.Now(), Latitude: 52.23, Longitude: 21.01, Satellites: 9, IO: map[uint16]codec8.IOValue{}}})
+	entries, _, _ := e.st.Entries(ctx)
+	devices[entries[0].PublicID] = "ha0123456789abcdef"
+
+	_, loc := e.post("/areas", url.Values{"name": {"Home"}, "latitude": {"52.23"}, "longitude": {"21.01"}, "radius": {"100"}, "color": {"#4caf50"}}, "X-Ingress-Path", ingress)
+	if strings.Contains(loc, "loxone") {
+		t.Errorf("Loxone reminder in the app: %s", loc)
+	}
+	for _, path := range []string{"/", "/trackers/" + itoa(tr.ID), "/areas", "/areas/new", "/areas/1", "/integrations", "/link"} {
+		status, body, _ := e.getWith(path, "X-Ingress-Path", ingress)
+		if status != 200 {
+			t.Errorf("%s: %d", path, status)
+		}
+		if strings.Contains(strings.ToLower(body), "loxone") {
+			t.Errorf("%s mentions Loxone", path)
+		}
+	}
+	link := `href="/config/devices/device/ha0123456789abcdef" target="_top"`
+	_, body, _ := e.getWith("/", "X-Ingress-Path", ingress)
+	contains(t, body, link)
+	_, body, _ = e.getWith("/trackers/"+itoa(tr.ID), "X-Ingress-Path", ingress)
+	contains(t, body, link, "Open in Home Assistant")
+	// Outside Home Assistant (port 8080 directly) the link would point
+	// nowhere, so there's none.
+	if _, body := e.get("/trackers/" + itoa(tr.ID)); strings.Contains(body, "/config/devices") {
+		t.Error("device link outside Home Assistant")
+	}
+
+	// The Loxone template and feed still work, by their URLs.
+	res, err := http.Get(e.srv.URL + "/loxone/template")
+	if err != nil {
+		t.Fatal(err)
+	}
+	xml, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	if res.StatusCode != 200 || !strings.Contains(string(xml), "/loxone/feed/cil_") {
+		t.Fatalf("template %d", res.StatusCode)
+	}
+	token := strings.SplitN(strings.SplitN(string(xml), "/loxone/feed/", 2)[1], `"`, 2)[0]
+	if status, feed := e.get("/loxone/feed/" + token); status != 200 || !strings.Contains(feed, "t1_zone=1\n") {
+		t.Errorf("feed %d %q", status, feed)
 	}
 }

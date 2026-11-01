@@ -1,8 +1,8 @@
 {{define "content"}}{{$d := .Data}}{{$p := $d.E.Position}}
 <p class="back"><a href="{{$.Base}}/">← Trackers</a></p>
 <div class="head-row">
-  <h1>{{$d.E.Name}}</h1>
-  <span class="badge is-{{$d.State}}">{{$d.Badge}}</span>
+  <div class="inline-form"><h1>{{$d.E.Name}}</h1><span class="badge is-{{$d.State}}">{{$d.Badge}}</span></div>
+  {{with $d.HADevice}}<a class="btn btn-ghost" href="/config/devices/device/{{.}}" target="_top">Open in Home Assistant ↗</a>{{end}}
 </div>
 
 <div class="grid">
@@ -39,7 +39,7 @@
         <div><dt>IMEI</dt><dd class="mono">{{$d.T.IMEI}}</dd></div>
         <div><dt>Device ID</dt><dd class="mono">{{$d.E.PublicID}}</dd></div>
         <div><dt>Model</dt><dd>{{$d.E.Model}}</dd></div>
-        <div><dt>Loxone number</dt><dd class="mono">t{{$d.E.LoxoneNumber}}</dd></div>
+        {{if not $.HAApp}}<div><dt>Loxone number</dt><dd class="mono">t{{$d.E.LoxoneNumber}}</dd></div>{{end}}
         <div><dt>Added</dt><dd>{{if $d.T.AddedAt}}{{date $d.T.AddedAt}}{{end}}</dd></div>
         <div><dt>Last connected</dt><dd>{{ago $d.T.LastSeenAt}}</dd></div>
         <div><dt>Stored positions</dt><dd>{{$d.Count}}</dd></div>
@@ -49,6 +49,7 @@
       </form>
     </section>
 
+    {{if not $.HAApp}}
     <section class="card">
       <div class="card-pad"><h2>What Loxone gets</h2><p class="sub">The values the Miniserver reads now. An empty value isn't sent, so Loxone keeps the last one.</p></div>
       <table class="table compact">
@@ -57,6 +58,7 @@
         </tbody>
       </table>
     </section>
+    {{end}}
   </div>
 </div>
 {{end}}

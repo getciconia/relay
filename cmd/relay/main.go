@@ -21,6 +21,7 @@ import (
 
 	"github.com/getciconia/relay/internal/api"
 	"github.com/getciconia/relay/internal/config"
+	"github.com/getciconia/relay/internal/hass"
 	"github.com/getciconia/relay/internal/ingest"
 	"github.com/getciconia/relay/internal/mqtt"
 	"github.com/getciconia/relay/internal/store"
@@ -88,6 +89,10 @@ func run() error {
 	panel := &web.Panel{
 		Store: st, Log: log, Version: version, MapTiles: cfg.MapTiles,
 		TrackerPort: port(cfg.TrackerAddr), TLS: certs, HAURL: cfg.HAURL, LoxoneURL: cfg.LoxoneURL, LoxonePort: cfg.LoxonePort,
+		HAApp: cfg.HAApp,
+	}
+	if cfg.HAApp && cfg.SupervisorToken != "" {
+		panel.HADevices = &hass.Devices{URL: hass.SupervisorAPI, Token: cfg.SupervisorToken, Log: log}
 	}
 	if tlsLn != nil {
 		panel.TLSPort = port(cfg.TrackerTLSAddr)

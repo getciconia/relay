@@ -1,7 +1,7 @@
 name: Ciconia Relay
-version: "0.1.0"
+version: "0.2.0"
 slug: ciconia_relay
-description: Receive your GPS trackers yourself and see them in Home Assistant and Loxone. No cloud.
+description: Receive your GPS trackers yourself and see them in Home Assistant. No cloud.
 url: https://getciconia.com/docs/
 arch:
   - aarch64
@@ -18,6 +18,8 @@ panel_icon: mdi:map-marker-radius
 panel_title: Ciconia Relay
 # Reads its own published port and the machine's address, for the Loxone template.
 hassio_api: true
+# Asks Home Assistant which device is each tracker's, to link to its page.
+homeassistant_api: true
 # Uses the Mosquitto broker app when it's installed, for MQTT discovery.
 services:
   - mqtt:want

@@ -31,6 +31,14 @@ type Config struct {
 	LoxoneURL  string // RELAY_LOXONE_URL: the address the Miniserver uses for the relay
 	LoxonePort string // RELAY_LOXONE_PORT: as a Home Assistant app, the host port the panel port is published on
 
+	// Running as a Home Assistant app (RELAY_HA_APP=true, set by the app's
+	// run.sh): the panel leaves out Loxone (its feed and template still
+	// work) and links each tracker to its device in Home Assistant, which it
+	// finds with the Supervisor's token (SUPERVISOR_TOKEN, set by Home
+	// Assistant for an app with homeassistant_api).
+	HAApp           bool
+	SupervisorToken string
+
 	// Limits on the public ports.
 	MaxConns      int // RELAY_MAX_CONNECTIONS
 	MaxConnsPerIP int // RELAY_MAX_CONNECTIONS_PER_IP
@@ -99,6 +107,10 @@ func Load() (Config, error) {
 	if c.LogPackets, err = boolean("RELAY_LOG_PACKETS"); err != nil {
 		return c, err
 	}
+	if c.HAApp, err = boolean("RELAY_HA_APP"); err != nil {
+		return c, err
+	}
+	c.SupervisorToken = os.Getenv("SUPERVISOR_TOKEN")
 	if c.Debug, err = boolean("RELAY_DEBUG"); err != nil {
 		return c, err
 	}
